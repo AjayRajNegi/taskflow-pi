@@ -1,16 +1,9 @@
 import type { Request, Response } from "express";
-import { Router } from "express";
 
-const router = Router();
-
-export const healthHandler = async (req: Request, res: Response) => {
-	return res.json({
+export const healthHandler = (_req: Request, res: Response) => {
+	res.status(200).json({
 		status: "ok",
 		timestamp: new Date().toISOString(),
 		version: "1.0.0",
 	});
 };
-
-router.get("/", healthHandler);
-
-export default router;
