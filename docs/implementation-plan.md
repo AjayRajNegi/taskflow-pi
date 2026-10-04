@@ -1,43 +1,42 @@
-Phase 1: Foundation
-  Task 1.1: Repository setup, Docker, CI
-  Task 1.2: Database schema and migrations
-  Task 1.3: Core infrastructure (config, logger, errors)
+# Implementation Plan
 
-Phase 2: Authentication
-  Task 2.1: User model and repository
-  Task 2.2: Registration endpoint
-  Task 2.3: Login endpoint
-  Task 2.4: Session middleware
-  Task 2.5: Auth tests
+This document outlines the implementation tasks for the TaskFlow API, broken down into small, independently implementable tasks.
 
-Phase 3: Tasks
-  Task 3.1: Task model and repository
-  Task 3.2: CRUD endpoints
-  Task 3.3: Task assignment
-  Task 3.4: Task tests
+## Task List
 
-Phase 4: Files
-  Task 4.1: S3 integration
-  Task 4.2: Upload endpoint
-  Task 4.3: Download endpoint
-  Task 4.4: File tests
+| Task ID | Title                                                                 | Dependencies       |
+|---------|-----------------------------------------------------------------------|--------------------|
+| T-001   | Project setup and health check endpoint                               | None               |
+| T-002   | Database schema: tenants and users tables                             | T-001              |
+| T-003   | Authentication: user registration and login endpoints                 | T-002              |
+| T-004   | Tenant service and API: create tenant, get user's tenant              | T-003              |
+| T-005   | User service and API: get and update current user profile             | T-004              |
+| T-006   | Task service and API: task CRUD operations                            | T-005              |
+| T-007   | File attachment service and API: upload, get metadata, delete         | T-006              |
+| T-008   | Subscription service and API: get subscription status, create subscription | T-006          |
+| T-009   | Payment webhook handler for Razorpay                                  | T-008              |
+| T-010   | Background job setup for task assignment notifications                | T-006              |
+| T-011   | OpenAPI specification generation and validation                       | T-003, T-004, T-005, T-006, T-007, T-008, T-009, T-010 |
+| T-012   | Security middleware: authentication, authorization, input validation  | T-003              |
+| T-013   | Rate limiting implementation                                          | T-012              |
+| T-014   | Logging and monitoring setup                                          | T-001              |
+| T-015   | Testing setup: unit and integration tests for core functionality      | T-002              |
 
-Phase 5: Notifications
-  Task 5.1: Queue setup (BullMQ)
-  Task 5.2: Email worker
-  Task 5.3: Assignment notification
+## Implementation Order
 
-Phase 6: Billing
-  Task 6.1: Stripe integration
-  Task 6.2: Subscription model
-  Task 6.3: Webhook handler
+The tasks should be implemented in the following order, respecting dependencies:
 
-Phase 7: Observability
-  Task 7.1: Structured logging
-  Task 7.2: Metrics
-  Task 7.3: Tracing
+T-001 → T-002 → T-003 → T-004 → T-005 → T-006 → T-007 → T-008 → T-009 → T-010 → T-011 → T-012 → T-013 → T-014 → T-015
 
-Phase 8: Production
-  Task 8.1: Deployment pipeline
-  Task 8.2: Runbook
-  Task 8.3: Monitoring dashboards
+Note: Some tasks may be implemented in parallel if their dependencies are satisfied (e.g., T-014 can start after T-001, T-015 after T-002). However, the linear order above ensures all dependencies are met.
+
+## Walking Skeleton (T-001)
+
+T-001 produces a minimal deployable walking skeleton that includes:
+- Project structure with basic server setup
+- Health check endpoint (`/health`) returning 200 OK
+- Ability to build and run the application
+- Basic Dockerfile or deployment configuration (if applicable)
+- Basic unit test framework configured
+
+Each subsequent task builds upon the previous ones to add functionality incrementally.
