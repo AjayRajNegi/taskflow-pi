@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { AuthenticationError, AuthorizationError } from "../errors";
+import { AuthenticationError } from "../errors";
 import { extractTokenFromHeader, type TokenPayload, verifyToken } from "./jwt";
 
 export interface AuthenticatedRequest extends Request {
