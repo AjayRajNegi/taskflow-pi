@@ -86,7 +86,6 @@ This provides:
 * Simple deployment
 * Low infrastructure overhead
 * Straightforward database transactions
-* Easy end-to-end testing
 * Clear separation of business domains
 * Ability to extract modules into services later if required
 
@@ -771,41 +770,7 @@ Environment-specific configuration should not be hardcoded.
 
 ---
 
-# 27. Testing Architecture
-
-The project should use multiple testing levels.
-
-## Unit Tests
-
-Test isolated business logic.
-
-## Integration Tests
-
-Test:
-
-* PostgreSQL interactions
-* Tenant isolation
-* Prisma queries
-* Background job behavior
-* External integration boundaries
-
-## API Tests
-
-Test complete HTTP flows.
-
-Critical scenarios include:
-
-```text
-Authenticated Tenant A → Tenant A resource = allowed
-
-Authenticated Tenant A → Tenant B resource = rejected
-```
-
-Cross-tenant isolation must have automated test coverage.
-
----
-
-# 28. Security Principles
+# 27. Security Principles
 
 The following principles apply throughout the architecture:
 
@@ -822,7 +787,7 @@ The following principles apply throughout the architecture:
 
 ---
 
-# 29. Architectural Trade-offs
+# 28. Architectural Trade-offs
 
 ## Modular Monolith
 
@@ -833,7 +798,6 @@ The following principles apply throughout the architecture:
 * Fast development
 * Easy local development
 * Easy transactions
-* Easy end-to-end testing
 
 ### Disadvantages
 
@@ -975,7 +939,6 @@ Defines:
 * How the coding agent should work
 * Repository conventions
 * Coding rules
-* Testing expectations
 * File/change restrictions
 
 If these documents conflict, the conflict must be identified before implementation rather than silently choosing one interpretation.

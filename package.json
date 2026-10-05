@@ -4,7 +4,9 @@
   "type": "module",
   "private": true,
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/bun": "latest",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/pg": "^8.23.1",
     "prisma": "^7.10.0"
   },
@@ -15,9 +17,13 @@
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "7",
     "@types/express": "^5.0.6",
+    "bcrypt": "^6.0.0",
     "dotenv": "^18.0.5",
     "express": "^5.2.1",
+    "jose": "^6.2.12",
+    "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.1",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.3",
+    "zod": "^4.6.5"
   }
 }

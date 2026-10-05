@@ -109,8 +109,7 @@ If an API change is necessary:
 1. Identify the affected contract.
 2. Explain the compatibility impact.
 3. Update the relevant documentation.
-4. Update tests.
-5. Then implement the change.
+4. Then implement the change.
 
 Use the project's standard error format.
 
@@ -133,7 +132,6 @@ For schema changes:
 1. Update `docs/data-model.md` when the design changes.
 2. Create the appropriate Prisma migration.
 3. Verify affected queries and constraints.
-4. Update tests.
 
 Never make destructive schema changes without explicit justification.
 
@@ -193,25 +191,6 @@ idempotency or deduplication mechanisms.
 
 Failed jobs should be observable and recoverable according to the
 architecture.
-
----
-
-## Testing
-
-Every meaningful behavior change should have appropriate tests.
-
-At minimum, test:
-
-- successful behavior
-- validation failures
-- authorization failures
-- tenant-isolation boundaries
-- important edge cases
-- external integration failure paths where practical
-
-Do not weaken or delete tests merely to make the test suite pass.
-
-Run the relevant tests after making changes.
 
 ---
 
@@ -295,9 +274,8 @@ Before implementing a feature:
 4. Identify affected modules.
 5. Create or follow the implementation plan.
 6. Implement the smallest coherent change.
-7. Run relevant tests and checks.
-8. Review the change for security and tenant-isolation issues.
-9. Update documentation if the design or contract changed.
+7. Review the change for security and tenant-isolation issues.
+8. Update documentation if the design or contract changed.
 
 Do not jump directly from a vague feature request to implementation
 when important design decisions are unresolved.

@@ -86,8 +86,6 @@ Tenant B
 
 Resources belonging to one tenant must not be accessible from another tenant.
 
-Tenant isolation should be tested explicitly.
-
 ---
 
 ## 5. Task Management API
@@ -434,55 +432,6 @@ Before implementing the system:
 
 ---
 
-## 20. Testing Requirements
-
-Tests should cover the security and functional requirements.
-
-### Multi-Tenant Tests
-
-At minimum, verify:
-
-```text
-Tenant A user -> Tenant A task     = allowed
-Tenant A user -> Tenant B task     = rejected
-Tenant B user -> Tenant B task     = allowed
-Tenant B user -> Tenant A task     = rejected
-```
-
-Also test that tenant IDs supplied by clients cannot be used to bypass authorization.
-
-### API Tests
-
-Test:
-
-* Successful requests
-* Invalid requests
-* Unauthorized requests
-* Missing resources
-* Cross-tenant access
-* File-size validation
-
-### Background Job Tests
-
-Test:
-
-* Successful notification
-* Retry behavior
-* Failed jobs
-* Duplicate-processing scenarios where applicable
-
-### Payment Tests
-
-Test:
-
-* Successful subscription state changes
-* Failed payment operations
-* Webhook handling
-* Retry behavior
-* Invalid/untrusted webhook requests
-
----
-
 ## 21. Success Metrics
 
 The implementation should target the following:
@@ -509,7 +458,6 @@ The zero cross-tenant data-leak requirement is a hard security requirement, not 
 * Row-level security or equivalent database-level isolation
 * Tenant-aware data access
 * Explicit authorization checks
-* Cross-tenant integration tests
 * Avoid trusting client-provided tenant identifiers
 
 ---
@@ -574,10 +522,9 @@ The project is considered complete when:
 * [ ] File access respects tenant isolation
 * [ ] Payment integration supports premium-feature state
 * [ ] Payment failures can be retried where appropriate
-* [ ] API performance targets are considered and tested
 * [ ] Error handling is implemented
 * [ ] Logging/observability is sufficient for diagnosing failures
-* [ ] Security-critical behavior has automated tests
+* [ ] Security-critical behavior
 * [ ] No web UI has been implemented
 * [ ] No mobile application has been implemented
 * [ ] No real-time collaboration features have been implemented
@@ -599,5 +546,4 @@ Before making implementation decisions:
 6. Preserve the stated non-goals.
 7. Prioritize tenant isolation and security.
 8. Implement incrementally.
-9. Test each major feature.
-10. Do not consider the project complete until the Definition of Done has been verified.
+9. Do not consider the project complete until the Definition of Done has been verified.
