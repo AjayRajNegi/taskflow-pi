@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authRouter } from "./auth";
+import { filesRouter } from "./files";
 import { healthHandler } from "./health";
 import { taskRouter } from "./tasks";
 import { tenantRouter } from "./tenants";
@@ -14,3 +15,4 @@ publicRouter.use("/auth", authRouter);
 protectedRouter.use("/tenants", tenantRouter);
 protectedRouter.use("/users", userRouter);
 protectedRouter.use("/tasks", taskRouter);
+protectedRouter.use("/files", filesRouter);

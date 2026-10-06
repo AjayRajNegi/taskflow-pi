@@ -66,10 +66,8 @@ taskRouter.post("/", async (req: Request, res: Response) => {
 });
 
 taskRouter.get("/:taskId", async (req: Request, res: Response) => {
-	// Validate taskId
 	const taskId = taskIdSchema.parse(req.params.taskId);
 
-	// Get task
 	const task = await taskService.getTask(
 		taskId,
 		(req as AuthenticatedRequest).user!.userId,
@@ -116,10 +114,8 @@ taskRouter.patch("/:taskId", async (req: Request, res: Response) => {
 });
 
 taskRouter.delete("/:taskId", async (req: Request, res: Response) => {
-	// Validate taskId
 	const taskId = taskIdSchema.parse(req.params.taskId);
 
-	// Delete task
 	await taskService.deleteTask(
 		taskId,
 		(req as AuthenticatedRequest).user!.userId,

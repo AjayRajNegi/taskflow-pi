@@ -15,6 +15,7 @@ model Tenant {
 
   users     User[]
   tasks     Task[]   @relation("TenantTasks")
+  attachments Attachment[] @relation("TenantAttachments")
 
   @@map("tenants")
 }
@@ -48,8 +49,27 @@ model Task {
 
   tenant    Tenant   @relation("TenantTasks", fields: [tenantId], references: [id], onDelete: Restrict)
   assignee  User?    @relation("UserAssignedTasks", fields: [assigneeId], references: [id], onDelete: SetNull)
+  attachments Attachment[] @relation("TaskAttachments")
 
   @@index([tenantId])
   @@index([assigneeId])
   @@map("tasks")
+}
+
+model Attachment {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @db.Uuid @map("tenant_id")
+  taskId    String   @db.Uuid @map("task_id")
+  filename  String   @db.VarChar(255)
+  mimeType  String?  @db.VarChar(100)
+  sizeBytes BigInt   @db.BigInt
+  storageKey String   @db.VarChar(255)
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+
+  tenant    Tenant   @relation("TenantAttachments", fields: [tenantId], references: [id], onDelete: Restrict)
+  task      Task     @relation("TaskAttachments", fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([taskId])
+  @@map("attachments")
 }
