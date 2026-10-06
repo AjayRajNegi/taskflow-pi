@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authRouter } from "./auth";
 import { healthHandler } from "./health";
+import { taskRouter } from "./tasks";
 import { tenantRouter } from "./tenants";
 import { userRouter } from "./users";
 
@@ -12,3 +13,4 @@ healthRouter.get("/health", healthHandler);
 publicRouter.use("/auth", authRouter);
 protectedRouter.use("/tenants", tenantRouter);
 protectedRouter.use("/users", userRouter);
+protectedRouter.use("/tasks", taskRouter);
