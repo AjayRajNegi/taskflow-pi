@@ -22,10 +22,16 @@ export const updateUserSchema = z.object({
   lastName: z.string().min(1).max(255).optional(),
 });
 
+export const createSubscriptionSchema = z.object({
+  planId: z.string().min(1, "planId is required"),
+  paymentMethodId: z.string().uuid("Invalid payment method ID").optional().nullable(),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type CreateTenantInput = z.infer<typeof createTenantSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
+export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
 
 export function validateRegister(input: unknown): RegisterInput {
   return registerSchema.parse(input);
@@ -41,4 +47,8 @@ export function validateCreateTenant(input: unknown): CreateTenantInput {
 
 export function validateUpdateUser(input: unknown): UpdateUserInput {
   return updateUserSchema.parse(input);
+}
+
+export function validateCreateSubscription(input: unknown): CreateSubscriptionInput {
+  return createSubscriptionSchema.parse(input);
 }

@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Tenant {
-  id        String   @id @default(uuid()) @db.Uuid
+  id        String   @id @default(uuid())
   name      String   @db.VarChar(255)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -16,12 +16,13 @@ model Tenant {
   users     User[]
   tasks     Task[]   @relation("TenantTasks")
   attachments Attachment[] @relation("TenantAttachments")
+  subscription Subscription? @relation("TenantSubscription")
 
   @@map("tenants")
 }
 
 model User {
-  id           String   @id @default(uuid()) @db.Uuid
+  id           String   @id @default(uuid())
   tenantId     String   @db.Uuid @map("tenant_id")
   email        String   @unique @db.VarChar(255)
   passwordHash String   @db.VarChar(255) @map("password_hash")
@@ -38,14 +39,14 @@ model User {
 }
 
 model Task {
-  id        String   @id @default(uuid()) @db.Uuid
+  id        String   @id @default(uuid())
   tenantId  String   @db.Uuid @map("tenant_id")
   title     String   @db.VarChar(255)
   description String? @db.Text
   status    String   @default("todo") @db.VarChar(50)
   assigneeId String? @db.Uuid @map("assignee_id")
   createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
 
   tenant    Tenant   @relation("TenantTasks", fields: [tenantId], references: [id], onDelete: Restrict)
   assignee  User?    @relation("UserAssignedTasks", fields: [assigneeId], references: [id], onDelete: SetNull)
@@ -57,7 +58,7 @@ model Task {
 }
 
 model Attachment {
-  id        String   @id @default(uuid()) @db.Uuid
+  id        String   @id @default(uuid())
   tenantId  String   @db.Uuid @map("tenant_id")
   taskId    String   @db.Uuid @map("task_id")
   filename  String   @db.VarChar(255)
@@ -72,4 +73,18 @@ model Attachment {
   @@index([tenantId])
   @@index([taskId])
   @@map("attachments")
+}
+
+model Subscription {
+  id        String   @id @default(uuid())
+  tenantId  String   @db.Uuid @map("tenant_id") @unique
+  status    String   @db.VarChar(50)
+  planId    String?  @db.VarChar(255) @map("plan_id")
+  currentPeriodEnd DateTime? @map("current_period_end")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  tenant    Tenant   @relation("TenantSubscription", fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
 }
