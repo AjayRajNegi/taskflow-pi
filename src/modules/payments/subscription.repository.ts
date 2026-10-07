@@ -20,11 +20,20 @@ export class SubscriptionRepository {
 		});
 	}
 
+	async findByRazorpaySubscriptionId(
+		razorpaySubscriptionId: string,
+	): Promise<Subscription | null> {
+		return prisma.subscription.findFirst({
+			where: { razorpaySubscriptionId },
+		});
+	}
+
 	async create(data: {
 		tenantId: string;
 		status: string;
 		planId?: string | null;
 		currentPeriodEnd?: Date | null;
+		razorpaySubscriptionId?: string | null;
 	}): Promise<Subscription> {
 		return prisma.subscription.create({
 			data: {
@@ -32,6 +41,7 @@ export class SubscriptionRepository {
 				status: data.status,
 				planId: data.planId,
 				currentPeriodEnd: data.currentPeriodEnd,
+				razorpaySubscriptionId: data.razorpaySubscriptionId,
 			},
 			include: {
 				tenant: true,
@@ -45,6 +55,7 @@ export class SubscriptionRepository {
 			status?: string;
 			planId?: string | null;
 			currentPeriodEnd?: Date | null;
+			razorpaySubscriptionId?: string | null;
 		},
 	): Promise<Subscription> {
 		return prisma.subscription.update({
@@ -53,6 +64,7 @@ export class SubscriptionRepository {
 				status: data.status,
 				planId: data.planId,
 				currentPeriodEnd: data.currentPeriodEnd,
+				razorpaySubscriptionId: data.razorpaySubscriptionId,
 			},
 			include: {
 				tenant: true,

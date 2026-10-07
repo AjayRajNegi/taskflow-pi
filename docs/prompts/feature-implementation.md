@@ -1,13 +1,13 @@
 description: Implement an approved task.
 ---
 
-Implement task `T-008`.
+Implement task `T-009`.
 
 ## Before coding
 
 Read:
 
-- `docs/tasks/T-008.md`
+- `docs/tasks/T-009.md`
 - `docs/project-requirements.md`
 - `docs/architecture.md`
 - `docs/system-components.md`
@@ -24,8 +24,8 @@ Do not redesign the system while implementing the task.
 
 ## Implementation rules
 
-1. Implement only `T-008`.
-2. Satisfy every acceptance criterion in `docs/tasks/T-008.md`.
+1. Implement only `T-009`.
+2. Satisfy every acceptance criterion in `docs/tasks/T-009.md`.
 3. Do not implement functionality listed as out of scope.
 4. Preserve existing behavior outside this task.
 5. Respect the architecture, component boundaries, API contracts,

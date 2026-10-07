@@ -12,12 +12,13 @@ export interface SubscriptionOutput {
 	createdAt: Date;
 	updatedAt: Date;
 	tenantId: string;
+	razorpaySubscriptionId: string | null;
 }
 
 export class SubscriptionService {
-	private subscriptionRepository: SubscriptionRepository;
-	private paymentService: PaymentService;
-	private tenantRepository: TenantRepository;
+	subscriptionRepository: SubscriptionRepository;
+	paymentService: PaymentService;
+	tenantRepository: TenantRepository;
 
 	constructor(
 		subscriptionRepository?: SubscriptionRepository,
@@ -46,15 +47,18 @@ export class SubscriptionService {
 		planId: string,
 		paymentMethodId?: string | null,
 	): Promise<SubscriptionOutput & { clientSecret?: string }> {
+		// Validate tenant exists
 		const tenant = await this.tenantRepository.findById(tenantId);
 		if (!tenant) {
 			throw new NotFoundError("Tenant not found");
 		}
 
+		// Validate planId
 		if (!planId || planId.trim().length === 0) {
 			throw new ValidationError("planId is required");
 		}
 
+		// Check if a subscription already exists for this tenant
 		const existingSubscription =
 			await this.subscriptionRepository.findByTenantId(tenantId);
 		if (existingSubscription) {
@@ -63,16 +67,8 @@ export class SubscriptionService {
 			throw new ValidationError("Subscription already exists for this tenant");
 		}
 
-		// TODO: Integrate with payment provider to create an order/subscription
-		// For now, we'll create a subscription record with a pending status
-		// and return a mock clientSecret for the client to complete payment.
-
-		// In a real implementation, we would:
-		// 1. Use the payment service to create an order with Razorpay
-		// 2. Save the subscription record with the Razorpay order ID and initial status (e.g., 'created')
-		// 3. Return the subscription info and the order details (including clientSecret if needed)
-
-		// We'll mock the payment service call
+		// Integrate with payment provider to create an order/subscription
+		// For now, we'll use the payment service to create an order and get an ID.
 		const paymentResponse = await this.paymentService.createOrder({
 			amount: 1000, // Example amount: 1000 paise = 10 INR (or whatever currency)
 			currency: "INR", // This should come from the plan configuration
@@ -83,15 +79,17 @@ export class SubscriptionService {
 			},
 		});
 
+		// The paymentResponse.id is the Razorpay order ID (or subscription ID in mock)
+		const razorpaySubscriptionId = paymentResponse.id;
+
 		// Create subscription record with initial status
-		// We'll set the status to 'created' or 'pending' based on our business logic.
-		// The webhook will update the status upon payment confirmation.
+		// We'll set the status to 'created' (pending payment confirmation)
 		const subscription = await this.subscriptionRepository.create({
 			tenantId,
 			status: "created", // initial status before payment confirmation
 			planId: planId.trim(),
-			// currentPeriodEnd will be set by the webhook when the subscription becomes active
-			currentPeriodEnd: null,
+			currentPeriodEnd: null, // will be set by webhook when subscription becomes active
+			razorpaySubscriptionId,
 		});
 
 		// Return the subscription info along with any client-secret needed for payment confirmation
@@ -99,7 +97,7 @@ export class SubscriptionService {
 		// We'll mock it here.
 		return {
 			...this.toSubscriptionOutput(subscription),
-			clientSecret: `secret_${Math.random().toString(36).substr(2, 9)}`,
+			clientSecret: `secret_${Math.random().toString(36).substr(2, 9)}`, // mock clientSecret
 		};
 	}
 
@@ -112,6 +110,7 @@ export class SubscriptionService {
 			createdAt: subscription.createdAt,
 			updatedAt: subscription.updatedAt,
 			tenantId: subscription.tenantId,
+			razorpaySubscriptionId: subscription.razorpaySubscriptionId,
 		};
 	}
 }

@@ -5,22 +5,37 @@ import express, {
 	type Response,
 } from "express";
 import { healthRouter, protectedRouter, publicRouter } from "./app/routes";
+import { webhookRouter } from "./app/routes/webhook";
 import { authMiddleware } from "./shared/auth/middleware";
 
 const app = express();
-const PORT = process.env.PORT ?? 3000;
+const PORT = process.env.PORT ?? 8000;
 
+// Capture raw body only for the webhook path
+app.use(
+	"/api/v1/payments/webhook",
+	express.raw({ type: "application/json" }),
+	webhookRouter,
+);
+
+// Parse JSON bodies (for API routes)
 app.use(express.json());
 
+// Health check (no auth required)
 app.use("/api/v1", healthRouter);
+
+// Public routes (no auth required)
 app.use("/api/v1", publicRouter);
 
+// Protected routes (auth required)
 app.use("/api/v1", authMiddleware, protectedRouter);
 
+// 404 handler
 app.use((_req, res: Response) => {
 	res.status(404).json({ error: { code: "NOT_FOUND", message: "Not Found" } });
 });
 
+// Error handler
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 	console.error("Error:", err);
 	if (err.name === "ZodError") {

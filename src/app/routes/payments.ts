@@ -9,32 +9,39 @@ export const paymentsRouter = Router();
 const subscriptionService = new SubscriptionService();
 
 paymentsRouter.get("/", async (req: Request, res: Response) => {
-	const user = requireTenantAccess(req);
+	try {
+		const user = requireTenantAccess(req);
 
-	const subscription = await subscriptionService.getSubscriptionByTenantId(
-		user.tenantId,
-	);
+		const subscription = await subscriptionService.getSubscriptionByTenantId(
+			user.tenantId,
+		);
 
-	if (!subscription) {
-		return res.status(404).json({
-			error: {
-				code: "NOT_FOUND",
-				message: "No subscription found for this tenant",
-			},
+		if (!subscription) {
+			return res.status(404).json({
+				error: {
+					code: "NOT_FOUND",
+					message: "No subscription found for this tenant",
+				},
+			});
+		}
+
+		res.json({
+			id: subscription.id,
+			status: subscription.status,
+			planId: subscription.planId,
+			currentPeriodEnd: subscription.currentPeriodEnd
+				? subscription.currentPeriodEnd.toISOString()
+				: null,
+			createdAt: subscription.createdAt.toISOString(),
+			updatedAt: subscription.updatedAt.toISOString(),
+			tenantId: subscription.tenantId,
+		});
+	} catch (err) {
+		console.error("Error fetching subscription:", err);
+		return res.status(500).json({
+			error: { code: "INTERNAL_ERROR", message: "Internal server error" },
 		});
 	}
-
-	res.json({
-		id: subscription.id,
-		status: subscription.status,
-		planId: subscription.planId,
-		currentPeriodEnd: subscription.currentPeriodEnd
-			? subscription.currentPeriodEnd.toISOString()
-			: null,
-		createdAt: subscription.createdAt.toISOString(),
-		updatedAt: subscription.updatedAt.toISOString(),
-		tenantId: subscription.tenantId,
-	});
 });
 
 paymentsRouter.post("/", async (req: Request, res: Response) => {
@@ -63,7 +70,7 @@ paymentsRouter.post("/", async (req: Request, res: Response) => {
 		});
 	} catch (err) {
 		if (err instanceof ValidationError) {
-			return res.status(400).json({
+			return res.status(409).json({
 				error: { code: "VALIDATION_ERROR", message: err.message },
 			});
 		}
