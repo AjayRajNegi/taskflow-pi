@@ -1,5 +1,7 @@
 import type { Task, User } from "../../../generated/prisma/client";
+import { QueueService } from "../../infrastructure/queue";
 import { NotFoundError, ValidationError } from "../../shared/errors";
+import { NotificationService } from "../notifications";
 import { UserRepository } from "../users/user.repository";
 import { TaskRepository } from "./task.repository";
 
@@ -24,13 +26,19 @@ const ALLOWED_STATUSES = ["todo", "in_progress", "done"];
 export class TaskService {
 	private taskRepository: TaskRepository;
 	private userRepository: UserRepository;
+	private queueService: QueueService;
+	private notificationService: NotificationService;
 
 	constructor(
 		taskRepository?: TaskRepository,
 		userRepository?: UserRepository,
+		queueService?: QueueService,
+		notificationService?: NotificationService,
 	) {
 		this.taskRepository = taskRepository || new TaskRepository();
 		this.userRepository = userRepository || new UserRepository();
+		this.queueService = queueService || new QueueService();
+		this.notificationService = notificationService || new NotificationService();
 	}
 
 	private validateStatus(status: string): void {
@@ -98,9 +106,14 @@ export class TaskService {
 			tenantId,
 		});
 
-		// TODO: Publish task.assigned event if assigneeId is set
-		// This would be implemented using an event publisher (e.g., to BullMQ)
-		// For now, we'll just return the task
+		// Publish task.assigned notification if assigneeId is set
+		if (data.assigneeId) {
+			await this.queueService.addNotificationJob({
+				taskId: task.id,
+				assigneeUserId: data.assigneeId,
+				taskTitle: data.title.trim(),
+			});
+		}
 
 		return this.toTaskOutput(task as Task & { assignee: User | null });
 	}
@@ -166,8 +179,18 @@ export class TaskService {
 			assigneeId: data.assigneeId ?? existingTask.assigneeId,
 		});
 
-		// TODO: Publish task.assigned event if assigneeId is set or changed
-		// This would check if assigneeId changed from the original value
+		// Publish task.assigned notification if assigneeId is set and changed from the original value
+		if (
+			data.assigneeId !== undefined &&
+			data.assigneeId !== null &&
+			data.assigneeId !== existingTask.assigneeId
+		) {
+			await this.queueService.addNotificationJob({
+				taskId: task.id,
+				assigneeUserId: data.assigneeId,
+				taskTitle: data.title ?? existingTask.title,
+			});
+		}
 
 		return this.toTaskOutput(task as Task & { assignee: User | null });
 	}

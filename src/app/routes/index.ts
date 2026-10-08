@@ -17,7 +17,7 @@ publicRouter.use("/auth", authRouter);
 // publicRouter.use("/payments/webhook", webhookRouter);
 
 // Protected routes (auth required)
-protectedRouter.use("/tenants", tenantRouter);
+publicRouter.use("/tenants", tenantRouter);
 protectedRouter.use("/users", userRouter);
 protectedRouter.use("/tasks", taskRouter);
 protectedRouter.use("/files", filesRouter);

@@ -11,6 +11,8 @@ import { authMiddleware } from "./shared/auth/middleware";
 const app = express();
 const PORT = process.env.PORT ?? 8000;
 
+console.log("REDIS_URL:", process.env.REDIS_URL);
+
 // Capture raw body only for the webhook path
 app.use(
 	"/api/v1/payments/webhook",
