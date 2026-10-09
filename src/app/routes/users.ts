@@ -1,8 +1,9 @@
 import { type Request, type Response, Router } from "express";
+import { z } from "zod";
+import { validateRequest } from "../../app/middleware/validation";
 import { TenantServiceWithUserRepo } from "../../modules/tenants/tenant.service";
 import { UserService } from "../../modules/users/user.service";
 import { requireTenantAccess } from "../../shared/auth/middleware";
-import { validateUpdateUser } from "../../shared/validation";
 
 export const userRouter = Router();
 
@@ -22,17 +23,26 @@ userRouter.get("/me", async (req: Request, res: Response) => {
 	res.json(userProfile);
 });
 
-userRouter.patch("/me", async (req: Request, res: Response) => {
-	const user = requireTenantAccess(req);
-	const input = validateUpdateUser(req.body);
+userRouter.patch(
+	"/me",
+	validateRequest({
+		body: z.object({
+			firstName: z.string().min(1).max(255).optional(),
+			lastName: z.string().min(1).max(255).optional(),
+		}),
+	}),
+	async (req: Request, res: Response) => {
+		const user = requireTenantAccess(req);
+		const input = req.body; // Already validated and parsed
 
-	const updatedUser = await userService.updateProfile(user.userId, {
-		firstName: input.firstName,
-		lastName: input.lastName,
-	});
+		const updatedUser = await userService.updateProfile(user.userId, {
+			firstName: input.firstName,
+			lastName: input.lastName,
+		});
 
-	res.json(updatedUser);
-});
+		res.json(updatedUser);
+	},
+);
 
 userRouter.get("/me/tenant", async (req: Request, res: Response) => {
 	const user = requireTenantAccess(req);

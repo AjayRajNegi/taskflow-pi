@@ -286,6 +286,10 @@ export class TaskService {
 		};
 	}
 
+	async findById(id: string): Promise<Task | null> {
+		return this.taskRepository.findById(id);
+	}
+
 	private toTaskOutput(task: Task & { assignee: User | null }): TaskOutput {
 		return {
 			id: task.id,

@@ -1,8 +1,9 @@
 import { type Request, type Response, Router } from "express";
+import { z } from "zod";
+import { validateRequest } from "../../app/middleware/validation";
 import { SubscriptionService } from "../../modules/payments/subscription.service";
 import { requireTenantAccess } from "../../shared/auth/middleware";
 import { NotFoundError, ValidationError } from "../../shared/errors";
-import { validateCreateSubscription } from "../../shared/validation";
 
 export const paymentsRouter = Router();
 
@@ -44,44 +45,57 @@ paymentsRouter.get("/", async (req: Request, res: Response) => {
 	}
 });
 
-paymentsRouter.post("/", async (req: Request, res: Response) => {
-	const user = requireTenantAccess(req);
-	const input = validateCreateSubscription(req.body);
+paymentsRouter.post(
+	"/",
+	validateRequest({
+		body: z.object({
+			planId: z.string().min(1, "planId is required"),
+			paymentMethodId: z
+				.string()
+				.uuid("Invalid payment method ID")
+				.optional()
+				.nullable(),
+		}),
+	}),
+	async (req: Request, res: Response) => {
+		const user = requireTenantAccess(req);
+		const input = req.body; // Already validated and parsed by validateRequest
 
-	try {
-		const result = await subscriptionService.createSubscription(
-			user.tenantId,
-			input.planId,
-			input.paymentMethodId,
-		);
+		try {
+			const result = await subscriptionService.createSubscription(
+				user.tenantId,
+				input.planId,
+				input.paymentMethodId,
+			);
 
-		res.status(201).json({
-			id: result.id,
-			status: result.status,
-			planId: result.planId,
-			currentPeriodEnd: result.currentPeriodEnd
-				? result.currentPeriodEnd.toISOString()
-				: null,
-			createdAt: result.createdAt.toISOString(),
-			updatedAt: result.updatedAt.toISOString(),
-			tenantId: result.tenantId,
-			// Include clientSecret if present (for payment confirmation)
-			...(result.clientSecret ? { clientSecret: result.clientSecret } : {}),
-		});
-	} catch (err) {
-		if (err instanceof ValidationError) {
-			return res.status(409).json({
-				error: { code: "VALIDATION_ERROR", message: err.message },
+			res.status(201).json({
+				id: result.id,
+				status: result.status,
+				planId: result.planId,
+				currentPeriodEnd: result.currentPeriodEnd
+					? result.currentPeriodEnd.toISOString()
+					: null,
+				createdAt: result.createdAt.toISOString(),
+				updatedAt: result.updatedAt.toISOString(),
+				tenantId: result.tenantId,
+				// Include clientSecret if present (for payment confirmation)
+				...(result.clientSecret ? { clientSecret: result.clientSecret } : {}),
+			});
+		} catch (err) {
+			if (err instanceof ValidationError) {
+				return res.status(409).json({
+					error: { code: "VALIDATION_ERROR", message: err.message },
+				});
+			}
+			if (err instanceof NotFoundError) {
+				return res.status(404).json({
+					error: { code: "NOT_FOUND", message: err.message },
+				});
+			}
+			console.error("Error creating subscription:", err);
+			return res.status(500).json({
+				error: { code: "INTERNAL_ERROR", message: "Internal server error" },
 			});
 		}
-		if (err instanceof NotFoundError) {
-			return res.status(404).json({
-				error: { code: "NOT_FOUND", message: err.message },
-			});
-		}
-		console.error("Error creating subscription:", err);
-		return res.status(500).json({
-			error: { code: "INTERNAL_ERROR", message: "Internal server error" },
-		});
-	}
-});
+	},
+);

@@ -28,11 +28,14 @@ export const taskQuerySchema = z.object({
 		.string()
 		.regex(/^\d+$/)
 		.transform(Number)
+		.pipe(z.number().min(1, "page must be >= 1"))
 		.default(() => 1),
 	limit: z
 		.string()
 		.regex(/^\d+$/)
 		.transform(Number)
+		.pipe(z.number().min(1, "limit must be >= 1"))
+		.pipe(z.number().max(100, "limit must be <= 100"))
 		.default(() => 10),
 	status: z.enum(["todo", "in_progress", "done"]).optional(),
 	assigneeId: z.string().uuid("Invalid assignee ID").optional().nullable(),

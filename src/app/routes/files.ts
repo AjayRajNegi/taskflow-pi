@@ -1,5 +1,7 @@
 import { type Request, type Response, Router } from "express";
 import multer from "multer";
+import { z } from "zod";
+import { validateRequest } from "../../app/middleware/validation";
 import { FileService } from "../../modules/files/file.service";
 import type { AuthenticatedRequest } from "../../shared/auth/middleware";
 import { NotFoundError, ValidationError } from "../../shared/errors";
@@ -67,10 +69,15 @@ filesRouter.post(
 
 filesRouter.get(
 	"/:attachmentId",
-	async (req: Request<{ attachmentId: string }>, res: Response) => {
+	validateRequest({
+		params: z.object({
+			attachmentId: z.string().uuid("Invalid attachment ID format"),
+		}),
+	}),
+	async (req: Request, res: Response) => {
 		try {
 			const attachment = await fileService.getFileMetadata(
-				req.params.attachmentId,
+				req.params.attachmentId as string,
 				(req as unknown as AuthenticatedRequest).user!.tenantId,
 			);
 
@@ -100,10 +107,15 @@ filesRouter.get(
 
 filesRouter.delete(
 	"/:attachmentId",
-	async (req: Request<{ attachmentId: string }>, res: Response) => {
+	validateRequest({
+		params: z.object({
+			attachmentId: z.string().uuid("Invalid attachment ID format"),
+		}),
+	}),
+	async (req: Request, res: Response) => {
 		try {
 			await fileService.deleteFile(
-				req.params.attachmentId,
+				req.params.attachmentId as string,
 				(req as unknown as AuthenticatedRequest).user!.tenantId,
 			);
 			res.status(204).send();

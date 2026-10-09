@@ -1,4 +1,6 @@
 import { type Job, Queue, Worker } from "bullmq";
+import type { NotificationService } from "../../modules/notifications";
+import type { EmailProvider } from "../../shared/email";
 
 export interface NotificationJobData {
 	taskId: string;
@@ -37,19 +39,19 @@ export class QueueService {
 			connection: this.redisConnectionOptions,
 		});
 
-		(this.notificationQueue as any).on("waiting", (jobId) => {
+		(this.notificationQueue as any).on("waiting", (jobId: string) => {
 			console.log(`[QueueService] Job ${jobId} is waiting to be processed`);
 		});
 
-		(this.notificationQueue as any).on("active", (job) => {
+		(this.notificationQueue as any).on("active", (job: Job) => {
 			console.log(`[QueueService] Job ${job.id} is now processing`);
 		});
 
-		(this.notificationQueue as any).on("completed", (job) => {
+		(this.notificationQueue as any).on("completed", (job: Job) => {
 			console.log(`[QueueService] Job ${job.id} has completed`);
 		});
 
-		(this.notificationQueue as any).on("failed", (job, error) => {
+		(this.notificationQueue as any).on("failed", (job: Job, error: Error) => {
 			console.error(`[QueueService] Job ${job.id} has failed`, error);
 		});
 	}
@@ -71,8 +73,8 @@ export class QueueService {
 	}
 
 	createNotificationWorker(
-		emailProvider: any,
-		notificationService: any,
+		emailProvider: EmailProvider,
+		notificationService: NotificationService,
 	): Worker {
 		return new Worker(
 			"task-notifications",
