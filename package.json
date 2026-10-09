@@ -1,6 +1,6 @@
 {
   "name": "pi",
-  "module": "index.ts",
+  "module": "src/server.ts",
   "type": "module",
   "private": true,
   "devDependencies": {
@@ -14,6 +14,9 @@
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "scripts": {
+    "dev": "bun --hot run src/server.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
