@@ -1,6 +1,7 @@
 import { type Job, Queue, Worker } from "bullmq";
 import type { NotificationService } from "../../modules/notifications";
 import type { EmailProvider } from "../../shared/email";
+import { logger } from "../../shared/logging/logger";
 
 export interface NotificationJobData {
 	taskId: string;
@@ -25,10 +26,9 @@ export class QueueService {
 				db: parseInt(url.pathname.substring(1)) || 0,
 			};
 		} catch (error) {
-			console.warn(
-				"Failed to parse REDIS_URL, using default localhost:6379",
+			logger.warn("Failed to parse REDIS_URL, using default localhost:6379", {
 				error,
-			);
+			});
 			this.redisConnectionOptions = {
 				host: "localhost",
 				port: 6379,
@@ -40,19 +40,22 @@ export class QueueService {
 		});
 
 		(this.notificationQueue as any).on("waiting", (jobId: string) => {
-			console.log(`[QueueService] Job ${jobId} is waiting to be processed`);
+			logger.debug(`Job ${jobId} is waiting to be processed`, { jobId });
 		});
 
 		(this.notificationQueue as any).on("active", (job: Job) => {
-			console.log(`[QueueService] Job ${job.id} is now processing`);
+			logger.debug(`Job ${job.id} is now processing`, { jobId: job.id });
 		});
 
 		(this.notificationQueue as any).on("completed", (job: Job) => {
-			console.log(`[QueueService] Job ${job.id} has completed`);
+			logger.info(`Job ${job.id} has completed`, { jobId: job.id });
 		});
 
 		(this.notificationQueue as any).on("failed", (job: Job, error: Error) => {
-			console.error(`[QueueService] Job ${job.id} has failed`, error);
+			logger.error(`Job ${job.id} has failed`, {
+				jobId: job.id,
+				error: error.message,
+			});
 		});
 	}
 

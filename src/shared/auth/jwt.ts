@@ -29,6 +29,32 @@ export async function verifyToken(token: string): Promise<TokenPayload> {
 	};
 }
 
+/**
+ * Decode the JWT payload without verification.
+ * Returns the payload object if the token is a valid JWT (base64url encoded parts),
+ * otherwise returns undefined.
+ * This is intended for logging only; do not trust the payload for security decisions.
+ */
+export function decodeTokenPayload(token: string): TokenPayload | undefined {
+	try {
+		// JWT format: header.payload.signature
+		const parts = token.split(".");
+		if (parts.length !== 3) return undefined;
+		const payloadBase64 = parts[1];
+		if (!payloadBase64) return undefined;
+		// Replace URL-safe characters
+		let padded = payloadBase64.replace(/-/g, "+").replace(/_/g, "/");
+		// Add padding if needed
+		while (padded.length % 4) {
+			padded += "=";
+		}
+		const decoded = Buffer.from(padded, "base64").toString("utf8");
+		return JSON.parse(decoded) as TokenPayload;
+	} catch {
+		return undefined;
+	}
+}
+
 export function extractTokenFromHeader(
 	authHeader: string | undefined,
 ): string | null {

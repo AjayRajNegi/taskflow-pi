@@ -89,7 +89,7 @@ The implementation was verified by:
   - Existing functionality remains unchanged (e.g., creating a task with an assignee still triggers a notification job via T-010).
 
 ## Compliance with Requirements
-✅ **Authentication middleware**: Verifies JWT, extracts user payload, attaches to request, returns 401 on missing/invalid token.
+✅ **Authentication middleware**: Verifies JWT, extracts user payload, attaches to request, returns 401 on missing/invalid token. 
 ✅ **Authorization middleware**: For tenant-owned resources, ensures resource's tenantId matches user's tenantId; returns 404 on mismatch to avoid leaking existence.
 ✅ **Input validation middleware**: Uses Zod schemas to validate body, query, params; returns 400 with detailed error messages.
 ✅ **Shared validation module**: Reusable Zod schemas with custom refinements (e.g., assignee belongs to same tenant) are used.

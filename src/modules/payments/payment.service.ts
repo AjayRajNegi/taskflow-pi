@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { logger } from "../../shared/logging/logger";
 
 // This is a stub for the Razorpay payment service.
 // In a real implementation, this would interact with the Razorpay API.
@@ -8,7 +9,7 @@ export class PaymentService {
 	constructor() {
 		this.webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || "";
 		if (!this.webhookSecret) {
-			console.warn(
+			logger.warn(
 				"RAZORPAY_WEBHOOK_SECRET is not set. Webhook signature verification will fail.",
 			);
 		}
@@ -27,6 +28,7 @@ export class PaymentService {
 	}> {
 		// TODO: Implement actual Razorpay API call
 		// For now, return a mock response
+		logger.debug("Creating Razorpay order (stub)", { options });
 		return {
 			id: `order_${Math.random().toString(36).substr(2, 9)}`,
 			amount: options.amount,
@@ -44,6 +46,13 @@ export class PaymentService {
 		signature: string | undefined,
 	): boolean {
 		if (!signature || !this.webhookSecret) {
+			logger.debug(
+				"Webhook signature verification failed: missing signature or secret",
+				{
+					signatureProvided: !!signature,
+					secretProvided: !!this.webhookSecret,
+				},
+			);
 			return false;
 		}
 
@@ -57,9 +66,17 @@ export class PaymentService {
 
 		// timingSafeEqual throws if lengths differ
 		if (expectedBuf.length !== receivedBuf.length) {
+			logger.debug("Webhook signature verification failed: length mismatch", {
+				expectedLength: expectedBuf.length,
+				receivedLength: receivedBuf.length,
+			});
 			return false;
 		}
 
-		return crypto.timingSafeEqual(expectedBuf, receivedBuf);
+		const isEqual = crypto.timingSafeEqual(expectedBuf, receivedBuf);
+		if (!isEqual) {
+			logger.debug("Webhook signature verification failed: signature mismatch");
+		}
+		return isEqual;
 	}
 }

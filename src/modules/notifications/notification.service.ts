@@ -1,5 +1,6 @@
 import type { EmailProvider, SendEmailOptions } from "../../shared/email";
 import { NotFoundError } from "../../shared/errors";
+import { logger } from "../../shared/logging/logger";
 import { TaskRepository } from "../tasks/task.repository";
 import { UserRepository } from "../users/user.repository";
 
@@ -21,11 +22,15 @@ export class NotificationService {
 	private createDummyEmailProvider(): EmailProvider {
 		return {
 			async send(options: SendEmailOptions): Promise<void> {
-				console.log("[NotificationService] Sending email via dummy provider:");
-				console.log(`  To: ${options.to}`);
-				console.log(`  Subject: ${options.subject}`);
-				console.log(`  Text: ${options.text}`);
-				console.log("----------------------------------------");
+				logger.debug(
+					"[NotificationService] Sending email via dummy provider:",
+					{
+						to: options.to,
+						subject: options.subject,
+						hasText: !!options.text,
+						hasHtml: !!options.html,
+					},
+				);
 			},
 		};
 	}
@@ -102,15 +107,17 @@ TaskFlow Team
 				assigneeUserId,
 				taskTitle,
 			);
-			console.log(
-				`[NotificationService] Successfully processed notification for task ${taskId} assigned to user ${assigneeUserId}`,
+			logger.info(
+				`Successfully processed notification for task ${taskId} assigned to user ${assigneeUserId}`,
+				{ taskId, assigneeUserId },
 			);
-		} catch (error) {
-			console.error(
-				`[NotificationService] Failed to process notification for task ${taskId} assigned to user ${assigneeUserId}:`,
-				error,
+		} catch (e) {
+			const err = e as Error;
+			logger.error(
+				`Failed to process notification for task ${taskId} assigned to user ${assigneeUserId}:`,
+				{ taskId, assigneeUserId, error: err.message },
 			);
-			throw error;
+			throw err;
 		}
 	}
 }
